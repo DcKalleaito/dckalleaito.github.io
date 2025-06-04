@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mazzi Serverside - Roblox Executor</title>
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: #020202; /* Near-black background */
+      color: #bbb; /* Adjusted for readability */
+      margin: 0;
+      padding: 0;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Particle Background */
+    #particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(135deg, #0f1415, #004466); /* Darker, muted gradient */
+    }
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.3); /* Slightly muted particles */
+      border-radius: 50%;
+      animation: float 10s infinite linear;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh); opacity: 0.5; }
+      100% { transform: translateY(-10vh); opacity: 0; }
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      padding: 80px 5%;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      animation: slideIn 0.5s ease;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .tab-content h1 {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    .tab-content p {
+      font-size: 1.3rem;
+      margin-bottom: 30px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* About Section in Pixel Worlds Tab */
+    .about-section {
+      font-size: 1.1rem;
+      color: #888; /* Secondary text color */
+      margin-top: 20px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 15px 40px;
+      background-color: #b22222; /* Desaturated red */
+      color: #fff;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin: 10px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .btn:hover {
+      background-color: #8b1a1a; /* Darker hover */
+      transform: scale(1.05);
+    }
+
+    /* Scroll Animation for Sections */
+    .fade-in-section {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* GIF Section */
+    .gif-section {
+      margin: 40px 0;
+      text-align: center;
+    }
+    .gif-section img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    /* Features Section */
+    .features {
+      margin: 40px 0;
+      padding: 20px;
+      background-color: #0d0d0d; /* Darker section background */
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); /* Shadow for depth */
+    }
+    .features h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #0077b6; /* Desaturated neon blue */
+    }
+    .features ul {
+      list-style: none;
+      padding: 0;
+    }
+    .features li {
+      font-size: 1.2rem;
+      margin: 10px 0;
+      color: #888; /* Adjusted for readability */
+    }
+    .features li::before {s
+      content: "✔";
+      color: #0077b6;
+      margin-right: 10px;
+    }
+
+    /* Verified Reviews Section */
+    .reviews {
+      margin: 40px 0;
+      padding: 20px;
+      background-color: #0d0d0d; /* Darker section background */
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); /* Shadow for depth */
+    }
+    .reviews h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #0077b6;
+    }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-item .icon {
+      font-size: 1.5rem;
+      color: #0077b6;
+      margin-bottom: 5px;
+    }
+    .stat-item p {
+      font-size: 1.2rem;
+      margin: 5px 0;
+      color: #888;
+    }
+    .stat-item p:first-of-type {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .review-card {
+      background-color: #151515; /* Darker card background */
+      padding: 15px;
+      border-radius: 5px;
+      text-align: left;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+    }
+    .review-card .verified {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .review-card .verified::before {
+      content: "✔";
+      color: #0077b6;
+      font-size: 1.2rem;
+    }
+    .review-card .stars {
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+    .review-card p {
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    /* Pricing Section (Mazzi Serverside Premium) */
+    .pricing {
+      margin: 40px 0;
+      padding: 20px;
+      background-color: #0d0d0d; /* Darker section background */
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); /* Shadow for depth */
+    }
+    .pricing h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #0077b6;
+    }
+    .pricing-plans {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .plan {
+      background-color: #151515; /* Darker card background */
+      padding: 20px;
+      border-radius: 5px;
+      width: 200px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+    }
+    .plan h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .plan p {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 15px;
+    }
+    .plan .price {
+      font-size: 1.8rem;
+      color: #0077b6;
+      margin-bottom: 15px;
+    }
+    .plan .payment-methods {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 15px;
+    }
+    .plan .btn {
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
+    .plan.premium {
+      background-color: #150000; /* Darker premium background */
+      border: 2px solid #b22222;
+    }
+    .plan.premium h3::after {
+      content: " ★ Most Popular";
+      font-size: 0.8rem;
+      color: #b22222;
+    }
+
+    /* Corner Menu */
+    .corner-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #0077b6; /* Desaturated neon blue */
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 1000;
+      transition: background-color 0.3s;
+    }
+    .corner-btn:hover {
+      background-color: #005f8b; /* Darker hover */
+    }
+    .corner-menu {
+      display: none;
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background-color: #0d0d0d; /* Darker menu background */
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); /* Shadow for depth */
+      z-index: 1000;
+    }
+    .corner-menu.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .corner-menu button {
+      display: block;
+      color: #fff;
+      background-color: #151515; /* Darker button background */
+      border: none;
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      text-align: left;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+    .corner-menu button:hover {
+      background-color: #222;
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Footer */
+    footer {
+      background-color: #010101; /* Darker footer background */
+      padding: 30px 5%;
+      text-align: center;
+      border-top: 1px solid #222;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    footer p {
+      font-size: 0.9rem;
+      color: #555; /* Darker footer text */
+    }
+    footer a {
+      color: #0077b6;
+      text-decoration: none;
+      margin: 0 15px;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .tab-content h1 {
+        font-size: 2.5rem;
+      }
+      .tab-content p {
+        font-size: 1rem;
+      }
+      .btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+      }
+      .corner-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 15px;
+      }
+      .stats {
+        flex-direction: column;
+        gap: 15px;
+      }
+      .pricing-plans {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Particle Background -->
+  <div id="particles"></div>
+
+  <!-- Tab Content -->
+  <div id="mazzi-free" class="tab-content active">
+    <h1>Mazzi Serverside Free</h1>
+    <p>ts so ass buy premium lol or pmo sybau🙏😔💔💔. NO MORE UPDATES ONLY TESTING GAMES SO</p>
+    <a href="https://discord.gg/v8g897P2" class="btn" onclick="playClickSound()">Download Now</a>
+
+    <!-- GIF Section -->
+    <section class="gif-section fade-in-section">
+      <img src="https://i.giphy.com/2zUn8hAwJwG4abiS0p.webp" alt="Mazzi Serverside GIF">
+    </section>
+  </div>
+
+  <div id="pixel-worlds-cheats" class="tab-content">
+    <h1>Pixel Worlds Cheats</h1>
+    <p>Enhance your Pixel Worlds experience with Mazzi Serverside's exclusive cheats.</p>
+    <a href="https://discord.gg/v8g897P2" class="btn" onclick="playClickSound()">Join Discord</a>
+    <div class="about-section">
+      <p>This will be the server for project reboot and OGPS cheat join it for future updates!</p>
+    </div>
+
+    <!-- GIF Section -->
+    <section class="gif-section fade-in-section">
+      <img src="https://i.giphy.com/2zUn8hAwJwG4abiS0p.webp" alt="Mazzi Serverside GIF">
+    </section>
+  </div>
+
+  <div id="mazzi-premium" class="tab-content">
+    <h1>Mazzi Serverside Premium</h1>
+    <p>BEST DEAL MAZZI SERVERSIDE PREMIUM BEST AND CHEAP AND FASTEST</p>
+
+    <!-- Pricing Section -->
+    <section class="pricing fade-in-section">
+      <h2>Choose Your Plan</h2>
+      <div class="pricing-plans">
+        <div class="plan">
+          <h3>Mazzi Standard Weekly</h3>
+          <p>Perfect for beginners</p>
+          <div class="price">$3 /week</div>
+          <div class="payment-methods">Pay with PayPal & Giftcards</div>
+          <a href="https://discord.gg/v8g897P2" class="btn" onclick="playClickSound()">Pay Now</a>
+          <ul>
+            <li>✔ Instant access without downloads</li>
+            <li>✔ Variety of unique games</li>
+            <li>✔ Low price point</li>
+            <li>✔ 4+ years of operation</li>
+            <li>✔ Community support</li>
+          </ul>
+        </div>
+        <div class="plan">
+          <h3>Mazzi Standard Lifetime</h3>
+          <p>Perfect for beginners</p>
+          <div class="price">$3 /lifetime or 100 robux</div>
+          <div class="payment-methods">Pay with PayPal & Giftcards</div>
+          <a href="https://discord.gg/v8g897P2" class="btn" onclick="playClickSound()">Pay Now</a>
+          <ul>
+            <li>✔ Instant access without downloads</li>
+            <li>✔ Variety of unique games 40+ games many games</li>
+            <li>✔ Low price point</li>
+            <li>✔ 4+ years of operation</li>
+            <li>✔ Community support</li>
+          </ul>
+        </div>
+        <div class="plan premium">
+          <h3>Mazzi Premium Weekly</h3>
+          <p>The ultimate experience</p>
+          <div class="price">$10 /week</div>
+          <div class="payment-methods">Pay with PayPal & Giftcards</div>
+          <a href="#" class="btn" onclick="playClickSound()">Pay Now</a>
+          <ul>
+            <li>✔ Everything in Standard</li>
+            <li>✔ Exclusive catalog of popular games</li>
+            <li>✔ Lighter TOS restriction</li>
+            <li>✔ Priority support</li>
+            <li>✔ All-inclusive package</li>
+          </ul>
+        </div>
+        <div class="plan premium">
+          <h3>Mazzi Premium Lifetime</h3>
+          <p>The ultimate experience</p>
+          <div class="price">$50 /lifetime</div>
+          <div class="payment-methods">Pay with PayPal & Giftcards</div>
+          <a href="https://discord.gg/v8g897P2" class="btn" onclick="playClickSound()">Pay Now</a>
+          <ul>
+            <li>✔ Everything in Standard</li>
+            <li>✔ Exclusive catalog of popular games 100+ games</li>
+            <li>✔ Lighter TOS restriction</li>
+            <li>✔ Priority support</li>
+            <li>✔ All-inclusive package</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features fade-in-section">
+      <h2>Why Choose Mazzi Serverside premium?</h2>
+      <ul>
+        <li>Completely Undetectable!</li>
+        <li>Support for games every day</li>
+        <li>Over 10+ positive reviews and 0 negative ones!</li>
+      </ul>
+    </section>
+
+    <!-- Verified Reviews Section -->
+    <section class="reviews fade-in-section">
+      <h2>Verified Reviews</h2>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="icon">✔</div>
+          <p>Verified Seller</p>
+        </div>
+        <div class="stat-item">
+          <div class="icon">★</div>
+          <p>4.7/5 Rated</p>
+        </div>
+        <div class="stat-item">
+          <div class="icon"></div>
+          <p>8+</p>
+          <p>Reviews</p>
+        </div>
+        <div class="stat-item">
+          <div class="icon"></div>
+          <p>20+</p>
+          <p>Products Sold</p>
+        </div>
+      </div>
+      <div class="review-grid">
+        <div class="review-card">
+          <div class="verified">Verified Customer</div>
+          <div class="stars">★ ★ ★ ★ ★</div>
+          <p>Automatically left after 3 days of purchase</p>
+        </div>
+        <div class="review-card">
+          <div class="verified">Verified Customer</div>
+          <div class="stars">★ ★ ★ ★</div>
+          <p>Automatically left after 3 days of purchase</p>
+        </div>
+        <div class="review-card">
+          <div class="verified">Verified Customer</div>
+          <div class="stars">★ ★ ★ ★ ★</div>
+          <p>Automatically left after 3 days of purchase</p>
+        </div>
+        <div class="review-card">
+          <div class="verified">Verified Customer</div>
+          <div class="stars">★ ★ ★ ★</div>
+          <p>Automatically left after 3 days of purchase</p>
+        </div>
+        <div class="review-card">
+          <div class="verified">Verified Customer</div>
+          <div class="stars">★ ★ ★ ★ ★</div>
+          <p>Automatically left after 3 days of purchase</p>
+        </div>
+        <div class="review-card">
+          <div class="verified">Verified Customer</div>
+          <div class="stars">★ ★ ★ ★ ★</div>
+          <p>Automatically left after 3 days of purchase</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- GIF Section -->
+    <section class="gif-section fade-in-section">
+      <img src="https://i.giphy.com/2zUn8hAwJwG4abiS0p.webp" alt="Mazzi Serverside GIF">
+    </section>
+  </div>
+
+  <!-- Corner Menu -->
+  <div class="corner-btn" onclick="playClickSound(); toggleMenu()">Menu</div>
+  <div class="corner-menu" id="cornerMenu">
+    <button onclick="playWooshSound(); showTab('pixel-worlds-cheats')">Pixel Worlds Cheats</button>
+    <button onclick="playWooshSound(); showTab('mazzi-free')">Mazzi Serverside Free</button>
+    <button onclick="playWooshSound(); showTab('mazzi-premium')">Mazzi Serverside Premium</button>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Mazzi Serverside. All rights reserved.</p>
+    <p>
+      <a href="https://discord.gg/v8g897P2" onclick="playClickSound()">Join Discord</a> |
+      <a href="/contact" onclick="playClickSound()">Contact Us</a> |
+      <a href="/terms" onclick="playClickSound()">Terms of Service</a>
+    </p>
+  </footer>
+
+  <!-- Audio Elements for Sound Effects -->
+  <audio id="clickSound" preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2023/08/14/audio_5b7a7c9e47.mp3" type="audio/mp3">
+  </audio>
+  <audio id="wooshSound" preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2023/08/14/audio_4e2b9f3a9e.mp3" type="audio/mp3">
+  </audio>
+
+  <script>
+    // Particle Animation
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      particle.style.width = `${Math.random() * 5 + 2}px`;
+      particle.style.height = particle.style.width;
+      particle.style.left = `${Math.random() * 100}vw`;
+      particle.style.animationDuration = `${Math.random() * 5 + 5}s`;
+      document.getElementById('particles').appendChild(particle);
+      setTimeout(() => particle.remove(), 10000);
+    }
+    setInterval(createParticle, 200);
+
+    // Tab Switching
+    function showTab(tabId) {
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach(content => {
+        content.classList.toggle('active', content.id === tabId);
+      });
+      toggleMenu();
+      const sections = document.querySelectorAll('.fade-in-section');
+      sections.forEach(section => {
+        section.classList.remove('visible');
+      });
+      checkSectionsInView();
+    }
+
+    // Corner Menu Toggle
+    function toggleMenu() {
+      const menu = document.getElementById('cornerMenu');
+      menu.classList.toggle('active');
+    }
+
+    // Sound Effects
+    const clickSound = document.getElementById('clickSound');
+    const wooshSound = document.getElementById('wooshSound');
+
+    function playClickSound() {
+      clickSound.currentTime = 0; // Reset to start
+      clickSound.play().catch(error => {
+        console.log('Click sound failed to play:', error);
+      });
+    }
+
+    function playWooshSound() {
+      wooshSound.currentTime = 0; // Reset to start
+      wooshSound.play().catch(error => {
+        console.log('Woosh sound failed to play:', error);
+      });
+    }
+
+    // Scroll Animation (Both Up and Down)
+    let lastScrollTop = 0;
+    function checkSectionsInView() {
+      const sections = document.querySelectorAll('.fade-in-section');
+      const windowHeight = window.innerHeight;
+      const currentScrollTop = window.scrollY || window.pageYOffset;
+
+      sections.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+        const sectionBottom = sectionTop + section.offsetHeight;
+        const isInView = (sectionTop < currentScrollTop + windowHeight * 0.8) && (sectionBottom > currentScrollTop);
+
+        if (isInView) {
+          section.classList.add('visible');
+        } else {
+          section.classList.remove('visible');
+        }
+      });
+
+      lastScrollTop = currentScrollTop;
+    }
+
+    window.addEventListener('scroll', checkSectionsInView);
+    window.addEventListener('load', checkSectionsInView);
+
+    // Replace 'Swift' with 'Mazzi'
+    document.body.innerHTML = document.body.innerHTML.replace(/Swift/g, 'Mazzi');
+
+    // Preload audio files
+    window.addEventListener('load', () => {
+      clickSound.load();
+      wooshSound.load();
+    });
+  </script>
+</body>
+</html>
